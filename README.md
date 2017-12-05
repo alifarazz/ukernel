@@ -2,6 +2,8 @@
 
 My first attempt at writing a kernel.
 
+It just displays a string and then sits in corner staring at you.
+
 ![alt text](screenshots/1.png)
 
 ## Clone it!
