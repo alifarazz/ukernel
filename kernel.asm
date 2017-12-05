@@ -14,6 +14,7 @@ global write_port
 global load_idt
 global keyboard_handler
 
+
 ;defined in the C file
 extern kmain			
 extern keyboard_handler_main
@@ -28,7 +29,17 @@ write_port:
 	mov al,	 [esp + 8]
 	out dx, al
 	ret
-	
+
+load_idt:
+	mov edx, [esp + 4]
+	lidt [edx]
+	sti
+	ret
+
+keyboard_handler:
+	call keyboard_handler_main
+	iretd	
+		
 start:
 	cli			;block interrupts
 	mov esp, stack_space	;set stack pointer
