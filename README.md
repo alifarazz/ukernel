@@ -17,7 +17,7 @@ I've only tested it in a Linux environment.
 You'll need: 
 * `gcc` to compile C files
 * `gnu make` to automate build process
-* `nasm` assembler
+* `nasm` the assembler
 * `qemu` to run the kernel [optional]
 
 ## Use it!
