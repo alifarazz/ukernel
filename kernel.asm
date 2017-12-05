@@ -8,10 +8,27 @@ section .text
 	dd -(0x1BADB002)	;checksum
 	; magic + flag + checksum should be 0
 	
-
 global start
-extern kmain			;defined in the C file
+global read_port
+global write_port
+global load_idt
+global keyboard_handler
 
+;defined in the C file
+extern kmain			
+extern keyboard_handler_main
+	
+read_port:
+	mov edx, [esp + 4]
+	in al, dx
+	ret
+
+write_port:
+	mov edx, [esp + 4]
+	mov al,	 [esp + 8]
+	out dx, al
+	ret
+	
 start:
 	cli			;block interrupts
 	mov esp, stack_space	;set stack pointer
