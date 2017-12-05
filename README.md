@@ -2,6 +2,7 @@
 
 My first attempt at writing a kernel.
 
+![alt text](screenshots/1.png)
 
 ## Clone it!
 
