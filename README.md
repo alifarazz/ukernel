@@ -1,6 +1,7 @@
 # µkernel
 
 My first attempt at writing a kernel.
+It just displays a string and then sits in corner staring at you.
 
 It just displays a string and then sits in corner staring at you.
 
