@@ -17,7 +17,7 @@ global keyboard_handler
 
 ;defined in the C file
 extern kmain			
-extern keyboard_handler_main
+;; extern keyboard_handler_main
 	
 read_port:
 	mov edx, [esp + 4]
@@ -37,7 +37,7 @@ load_idt:
 	ret
 
 keyboard_handler:
-	call keyboard_handler_main
+	;; call keyboard_handler_main
 	iretd	
 		
 start:
