@@ -157,21 +157,16 @@ void keyboard_handler_main(Uint *current_loc_ptr)
 
 void kmain()
 {
-  const char *str = "git gud";
+  const char *str = "got gud";
+  Uint current_loc = 0;
 
+  clear_screen();
+  kprint(str, &current_loc);
+  kprint_newline(&current_loc);
+  kprint_newline(&current_loc);
 
-    vidptr[j] = ' ';
-    /* attribute-byte */
-    vidptr[j + 1] = 0x07; /* light grey on black screen */
-  }
-
-  for (j = 0; str[j / 2] != '\0'; j += 2){
-    /* set ascii code */
-    vidptr[j] = str[j / 2];
-
-    /* black char on grey fg */
-    vidptr[j + 1] = 0x07;
-  }
+  idt_init();
+  kb_init();
 
   return ;
 }
