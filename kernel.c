@@ -129,18 +129,37 @@ void clear_screen(void)
   }
 }
 
+void keyboard_handler_main(Uint *current_loc_ptr)
+{
+  Uchar status;
+  char keycode;
 
+  /* write EOI */
+  write_port(0x20, 0x20);
+
+  status = read_port(PORT_KEYBOARD_STATUS);
+  /* LSB of status will be set if buffer isn't empty */
+  if (status & 0x01) {
+    keycode = read_port(PORT_KEYBOARD_DATA);
+
+    if (keycode < 0) return ;
+
+    if (keycode == ENTER_KEY_CODE) {
+      kprint_newline(current_loc_ptr);
+      return ;
+    }
+
+    vidptr[(*current_loc_ptr)++] = keyboad_map[(Uchar) keycode];
+    vidptr[(*current_loc_ptr)++] = 0x07;
+
+  }
+}
 
 void kmain()
 {
   const char *str = "git gud";
 
-  Uint j;
 
-  /* this loop clears the screen */
-  /* 25 lines, 80 columns */  /* each element is a word */
-  for (j = 0; j < VIDEO_SCREENSIZE_BYTE; j += 2){
-    /* character part */
     vidptr[j] = ' ';
     /* attribute-byte */
     vidptr[j + 1] = 0x07; /* light grey on black screen */
