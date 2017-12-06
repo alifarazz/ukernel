@@ -99,6 +99,37 @@ void idt_init()
   load_idt(idt_ptr);
 }
 
+void kb_init()
+{
+  /* 0xFD enables IRQ1 only (the keyboard) */
+  write_port(0x21, 0xFD);
+}
+
+void kprint(const char str[], Uint *current_loc_ptr)
+{
+  Uint i;
+  for (i = 0; str[i] != '\0'; i++) {
+    vidptr[(*current_loc_ptr)++] = str[i]; /* set foreground to str[i] glyph*/
+    vidptr[(*current_loc_ptr)++] = 0x07;   /* set background to black*/
+  }
+}
+
+void kprint_newline(Uint *current_loc_ptr)
+{
+  Uint line_size = VIDEO_ELEMENT_SIZE_BYTE * VIDEO_COLUMNS_IN_LINE;
+  *(current_loc_ptr) += line_size - *(current_loc_ptr) % line_size;
+}
+
+void clear_screen(void)
+{
+  Uint i = 0;
+  while (i < VIDEO_SCREENSIZE_BYTE) {
+    vidptr[i++] = ' ';
+    vidptr[i++] = 0x07;
+  }
+}
+
+
 
 void kmain()
 {
