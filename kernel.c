@@ -22,7 +22,7 @@
 #define ENTER_KEY_CODE 0x1C
 
 /* external data */
-extern Uchar keyboad_map[128];
+extern Uchar keyboard_map[128];
 
 /* external funtions */
 extern void keyboard_handler();
@@ -149,7 +149,7 @@ void keyboard_handler_main(Uint *current_loc_ptr)
       return ;
     }
 
-    vidptr[(*current_loc_ptr)++] = keyboad_map[(Uchar) keycode];
+    vidptr[(*current_loc_ptr)++] = keyboard_map[(Uchar) keycode];
     vidptr[(*current_loc_ptr)++] = 0x07;
 
   }
