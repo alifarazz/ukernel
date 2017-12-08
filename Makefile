@@ -15,7 +15,7 @@ WARN=-Wall -Wextra
 STD=c99
 
 # compiler, assembler, linker flags
-CCFLAGS= -m32 $(WARN) -std="$(STD)" $(OPT) #-pipe
+CCFLAGS= -m32 $(WARN) -std="$(STD)" $(OPT) -fno-stack-protector #-pipe
 ASMFLAGS= -f elf32
 LINKERFLAGS= -m elf_i386 -T $(LINKERSCRIPT)
 

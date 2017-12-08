@@ -30,7 +30,7 @@ extern char read_port(Ushort port);
 extern void write_port(Ushort port, Uchar data);
 extern void load_idt(Ulong *idt_ptr);
 
-struct IDT_entry{
+struct IDT_entry {
   Ushort offset_lowerbits;
   Ushort selector;
   Uchar zero;
@@ -39,7 +39,7 @@ struct IDT_entry{
 };
 
 struct IDT_entry IDT[IDT_SIZE];
-char *vidptr = (char*) 0xb8000;
+volatile char *vidptr = (char*) 0xb8000; /* video memory begins at 0xb8000 */
 
 
 void idt_init()
@@ -50,11 +50,11 @@ void idt_init()
 
   /* hackety hack hack!! */
   keyboard_address = (Ulong) keyboard_handler;
-  IDT[0x21].offset_lowerbits = keyboard_address & 0xffff;
+  IDT[0x21].offset_lowerbits = keyboard_address & 0xFFFF;
   IDT[0x21].selector = KERNEL_CODE_SEGMENT_OFFSET;
   IDT[0x21].zero = 0;
   IDT[0x21].type_attr = INTERRUPT_GATE;
-  IDT[0x21].offset_higherbits = (keyboard_address & 0xffff0000) >> 16;
+  IDT[0x21].offset_higherbits = (keyboard_address & 0xFFFF0000) >> 16;
 
   /*************************/
   /*    Ports		   */
@@ -117,7 +117,7 @@ void kprint(const char str[], Uint *current_loc_ptr)
 void kprint_newline(Uint *current_loc_ptr)
 {
   Uint line_size = VIDEO_ELEMENT_SIZE_BYTE * VIDEO_COLUMNS_IN_LINE;
-  *(current_loc_ptr) += line_size - *(current_loc_ptr) % line_size;
+  *current_loc_ptr += line_size - *(current_loc_ptr) % line_size;
 }
 
 void clear_screen(void)
