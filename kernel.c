@@ -9,9 +9,8 @@
 #define VIDEO_COLUMNS_IN_LINE 80
 #define VIDEO_ELEMENT_SIZE_BYTE 2
 #define VIDEO_SCREENSIZE_BYTE (VIDEO_ELEMENT_SIZE_BYTE *	\
-			      VIDEO_COLUMNS_IN_LINE *		\
-			      VIDEO_LINES)			\
-
+			       VIDEO_COLUMNS_IN_LINE *		\
+			       VIDEO_LINES)
 
 #define PORT_KEYBOARD_DATA 0x60
 #define PORT_KEYBOARD_STATUS 0x64
@@ -22,34 +21,35 @@
 #define ENTER_KEY_CODE 0x1C
 
 /* external data */
-extern Uchar keyboard_map[128];
+/* extern UCHAR keyboard_map[128]; */
 
 /* external funtions */
-extern void keyboard_handler();
-extern char read_port(Ushort port);
-extern void write_port(Ushort port, Uchar data);
-extern void load_idt(Ulong *idt_ptr);
+extern void keyboard_handler(void);
+extern char read_port(USHORT port);
+extern void write_port(USHORT port, UCHAR data);
+extern void load_idt(ULONG *idt_ptr);
 
 struct IDT_entry {
-  Ushort offset_lowerbits;
-  Ushort selector;
-  Uchar zero;
-  Uchar type_attr;
-  Uint offset_higherbits;
+  USHORT offset_lowerbits;
+  USHORT selector;
+  UCHAR zero;
+  UCHAR type_attr;
+  USHORT offset_higherbits;
 };
 
 struct IDT_entry IDT[IDT_SIZE];
-volatile char *vidptr = (char*) 0xb8000; /* video memory begins at 0xb8000 */
 
+volatile char *vidptr = (char*) 0xb8000; // video memory begins at 0xb8000 
+UINT current_loc = 0; // cursor location 
 
-void idt_init()
+void idt_init(void)
 {
-  Ulong keyboard_address;
-  Ulong idt_address;
-  Ulong idt_ptr[2];
+  ULONG keyboard_address;
+  ULONG idt_address;
+  ULONG idt_ptr[2];
 
-  /* hackety hack hack!! */
-  keyboard_address = (Ulong) keyboard_handler;
+  /* populate IDT's entry of keyboard's interrupt */
+  keyboard_address = (ULONG) keyboard_handler;
   IDT[0x21].offset_lowerbits = keyboard_address & 0xFFFF;
   IDT[0x21].selector = KERNEL_CODE_SEGMENT_OFFSET;
   IDT[0x21].zero = 0;
@@ -67,11 +67,12 @@ void idt_init()
   write_port(0x20, 0x11);
   write_port(0xA0, 0x11);
 
+  /******************************************************/
+  /* In x86 protected mode, we have to remap the PICs 	*/
+  /* beyond 0x20 because Intel decided to designate the	*/
+  /* first 32 interrupts as reserved for cpu exceptions */
+  /******************************************************/
 
-  /***********************************************************************/
-  /* In x86 protected mode, we have to remap the PICs beyod 0x20 because */
-  /* Intel decided to reserve the first 32 interrupts for cpu exceptions */
-  /***********************************************************************/
   /* ICW2 - remap offset address of IDT */
   write_port(0x21, 0x20);
   write_port(0xA1, 0x28);
@@ -89,8 +90,8 @@ void idt_init()
   write_port(0x21, 0xFF);
   write_port(0xA1, 0xFF);
 
-  /* fill the IDT  */
-  idt_address = (Ulong) IDT;
+  /* fill the IDT descriptor  */
+  idt_address = (ULONG) IDT;
 
   /* pointer = size + offset */
   idt_ptr[0] = (sizeof(struct IDT_entry) * IDT_SIZE) + ((idt_address & 0xFFFF) << 16);
@@ -99,39 +100,38 @@ void idt_init()
   load_idt(idt_ptr);
 }
 
-void kb_init()
+void kb_init(void)
 {
   /* 0xFD enables IRQ1 only (the keyboard) */
   write_port(0x21, 0xFD);
 }
 
-void kprint(const char str[], Uint *current_loc_ptr)
+void kprint(const char str[])
 {
-  Uint i;
-  for (i = 0; str[i] != '\0'; i++) {
-    vidptr[(*current_loc_ptr)++] = str[i]; /* set foreground to str[i] glyph*/
-    vidptr[(*current_loc_ptr)++] = 0x07;   /* set background to black*/
+   for (UINT i = 0; str[i] != '\0'; i++) {
+    vidptr[current_loc++] = str[i]; // set foreground to str[i] glyph
+    vidptr[current_loc++] = 0x07;   // set background to black
   }
 }
 
-void kprint_newline(Uint *current_loc_ptr)
+void kprint_newline(void)
 {
-  Uint line_size = VIDEO_ELEMENT_SIZE_BYTE * VIDEO_COLUMNS_IN_LINE;
-  *current_loc_ptr += line_size - *(current_loc_ptr) % line_size;
+  UINT line_size = VIDEO_ELEMENT_SIZE_BYTE * VIDEO_COLUMNS_IN_LINE;
+  current_loc += line_size - current_loc % line_size;
 }
 
 void clear_screen(void)
 {
-  Uint i = 0;
+  UINT i = 0;
   while (i < VIDEO_SCREENSIZE_BYTE) {
     vidptr[i++] = ' ';
     vidptr[i++] = 0x07;
   }
 }
 
-void keyboard_handler_main(Uint *current_loc_ptr)
+void keyboard_handler_main(void)
 {
-  Uchar status;
+  UCHAR status;
   char keycode;
 
   /* write EOI */
@@ -142,31 +142,34 @@ void keyboard_handler_main(Uint *current_loc_ptr)
   if (status & 0x01) {
     keycode = read_port(PORT_KEYBOARD_DATA);
 
-    if (keycode < 0) return ;
+    if (keycode < 0)
+      return ;
 
     if (keycode == ENTER_KEY_CODE) {
-      kprint_newline(current_loc_ptr);
+      kprint_newline();
       return ;
     }
 
-    vidptr[(*current_loc_ptr)++] = keyboard_map[(Uchar) keycode];
-    vidptr[(*current_loc_ptr)++] = 0x07;
-
+    vidptr[current_loc++] = keyboard_map[(UCHAR) keycode];
+    /* vidptr[current_loc++] = 'a'; */
+    vidptr[current_loc++] = 0x07;
   }
 }
 
-void kmain()
+void kmain(void)
 {
   const char *str = "got gud";
-  Uint current_loc = 0;
 
   clear_screen();
-  kprint(str, &current_loc);
-  kprint_newline(&current_loc);
-  kprint_newline(&current_loc);
+  kprint(str);
+  kprint_newline();
+  kprint_newline();
 
   idt_init();
   kb_init();
 
+  for(;;);
+
+  /* TODO: dump whole memory using gdb and compare */
   return ;
 }

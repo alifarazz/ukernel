@@ -1,16 +1,16 @@
 # µkernel
 
 My first attempt at writing a kernel.
-It just displays a string and then sits in corner staring at you.
 
-It just displays a string and then sits in corner staring at you.
+It just displays a string and then ~~sits in corner staring at you.~~
+takes user input and displays it!
 
-![alt text](screenshots/1.png)
+![alt text](screenshots/2.png)
 
 ## Clone it!
 
 ```
-git clone git@gitlab.com:alifarazz/mkernel.git
+git clone git@gitlab.com:alifarazz/ukernel.git
 ```
 
 ## Install it!
@@ -26,14 +26,12 @@ You'll need:
 ## Use it!
 
 ```sh
-git clone git@gitlab.com:alifarazz/mkernel.git
-make
 make run
 ```
 
 ## Support!
 
-Please open an issue to receive support for this project.
+Open an issue and I'll look into it!
 
 ## Contribute to it!
 

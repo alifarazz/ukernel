@@ -31,6 +31,7 @@ write_port:
 	ret
 
 load_idt:
+	
 	mov 	edx, [esp + 4]
 	lidt 	[edx]
 	sti
